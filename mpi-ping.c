@@ -1,8 +1,8 @@
 /*
 * @Author: kmrocki
 * @Date:   2017-01-26 10:34:31
-* @Last Modified by:   kmrocki
-* @Last Modified time: 2017-01-26 21:08:37
+* @Last Modified by:   Kamil M Rocki
+* @Last Modified time: 2017-01-26 21:44:54
 */
 
 #include <mpi.h>
@@ -37,8 +37,6 @@ int main() {
 
 	int bytes = 1 << 30;
 	double tv[2], t;
-	int from = 1;
-	int to = 0;
 	int tag = 0x666;
 	unsigned char *receive_buf;
 	unsigned char *send_buf;
@@ -46,20 +44,28 @@ int main() {
 	receive_buf = (unsigned char *) malloc(bytes);
 	send_buf = (unsigned char *) malloc(bytes);
 
-	/***********************************/
-	tv[0] = MPI_Wtime();
+	for (int from = 0; from < world_size; from++) {
+		for (int to = 0; to < world_size; to++) {
 
-	if (rank == from)
-		MPI_Send(send_buf, bytes, MPI_BYTE, to, tag, MPI_COMM_WORLD);
-	if (rank == to)
-		MPI_Recv(receive_buf, bytes, MPI_BYTE, from, tag, MPI_COMM_WORLD, &status);
+			if (from == to)  continue;
 
-	MPI_Barrier(MPI_COMM_WORLD);
-	tv[1] = MPI_Wtime();
-	/***********************************/
-	t = (tv[1] - tv[0]) * 1000000.0;
+			/***********************************/
+			tv[0] = MPI_Wtime();
 
-	printf("%3d pinged %3d: %8d bytes %9.2f uSec %8.2f MB/s\n", from, to, bytes, t, bytes / (t));
+			if (rank == from)
+				MPI_Send(send_buf, bytes, MPI_BYTE, to, tag, MPI_COMM_WORLD);
+			if (rank == to)
+				MPI_Recv(receive_buf, bytes, MPI_BYTE, from, tag, MPI_COMM_WORLD, &status);
+
+			MPI_Barrier(MPI_COMM_WORLD);
+			tv[1] = MPI_Wtime();
+			/***********************************/
+			t = (tv[1] - tv[0]) * 1000000.0;
+
+			if (rank == from)
+				printf("%3d pinged %3d: %8d bytes %9.2f uSec %8.2f MB/s\n", from, to, bytes, t, bytes / (t));
+		}
+	}
 
 	// Finalize the MPI environment.
 	MPI_Finalize();
