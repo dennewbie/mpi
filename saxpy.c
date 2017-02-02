@@ -2,7 +2,7 @@
 * @Author: krocki
 * @Date:   2017-02-01 19:15:48
 * @Last Modified by:   krocki
-* @Last Modified time: 2017-02-01 21:33:42
+* @Last Modified time: 2017-02-01 21:37:04
 */
 
 #include <stdio.h>
@@ -22,18 +22,6 @@ double get_time(void) {
 }
 
 void saxpy(int* result, int* x, int* y, size_t N) {
-
-	size_t i;
-
-	for (i = 0; i < N; i++) {
-
-		result[i] = x[i] + y[i];
-
-	}
-
-}
-
-void saxpy_mpi(int* result, int* x, int* y, size_t N) {
 
 	size_t i;
 
@@ -131,7 +119,7 @@ int main(int argc, char ** argv) {
 		else
 			printf("[%d] Warming up (%d left)\n", rank, warmup);
 
-		saxpy_mpi(partial_result, partial_x, partial_y, N / world_size);
+		saxpy(partial_result, partial_x, partial_y, N / world_size);
 
 		double time_proc = get_time() - tic_computation;
 		//printf("time rank %d = %.9f s\n", rank, time_proc);
