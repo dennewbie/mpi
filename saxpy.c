@@ -2,7 +2,7 @@
 * @Author: krocki
 * @Date:   2017-02-01 19:15:48
 * @Last Modified by:   krocki
-* @Last Modified time: 2017-02-01 21:07:47
+* @Last Modified time: 2017-02-01 21:33:42
 */
 
 #include <stdio.h>
@@ -114,22 +114,31 @@ int main(int argc, char ** argv) {
 	int * partial_y = (int *) malloc(sizeof(int) * N / world_size);
 	int * partial_result = (int *) malloc(sizeof(int) * N / world_size);
 
-	if (rank == 0)
-		tic = get_time();
+	// number of warmup runs
+	int warmup = 3;
 
-	MPI_Scatter(x, N / world_size, MPI_INT, partial_x, N / world_size, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Scatter(y, N / world_size, MPI_INT, partial_y, N / world_size, MPI_INT, 0, MPI_COMM_WORLD);
+	for (; warmup >= 0; warmup--) {
+		if (rank == 0)
+			tic = get_time();
 
-	double tic_computation = get_time();
-	printf("Running parallel SAXPY on rank %d...\n", rank);
-	saxpy_mpi(partial_result, partial_x, partial_y, N / world_size);
+		MPI_Scatter(x, N / world_size, MPI_INT, partial_x, N / world_size, MPI_INT, 0, MPI_COMM_WORLD);
+		MPI_Scatter(y, N / world_size, MPI_INT, partial_y, N / world_size, MPI_INT, 0, MPI_COMM_WORLD);
 
-	double time_proc = get_time() - tic_computation;
-	printf("time rank %d = %.9f s\n", rank, time_proc);
+		double tic_computation = get_time();
 
-	MPI_Gather(partial_result, N / world_size, MPI_INT, result_mpi, N / world_size, MPI_INT, 0, MPI_COMM_WORLD);
+		if (warmup == 0)
+			printf("[%d] Running parallel SAXPY...\n", rank);
+		else
+			printf("[%d] Warming up (%d left)\n", rank, warmup);
 
-	MPI_Barrier(MPI_COMM_WORLD);
+		saxpy_mpi(partial_result, partial_x, partial_y, N / world_size);
+
+		double time_proc = get_time() - tic_computation;
+		//printf("time rank %d = %.9f s\n", rank, time_proc);
+
+		MPI_Gather(partial_result, N / world_size, MPI_INT, result_mpi, N / world_size, MPI_INT, 0, MPI_COMM_WORLD);
+
+	}
 
 	if (rank == 0) {
 
