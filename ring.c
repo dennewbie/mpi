@@ -6,6 +6,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <mpi.h>
 #include <stdio.h>
 
@@ -58,6 +59,6 @@ int main() {
 		printf("Node %d received %d from %d\n", rank, val, prev);
 
 	}
-
+	MPI_Finalize();
 	return 0;
 }

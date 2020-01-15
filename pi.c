@@ -106,6 +106,7 @@ int main() {
 		printf ( "diff = %f\n", fabs ( parallel_acc_pi - serial_pi ) );
 		
 	}
-	
+
+	MPI_Finalize();
 	return 0;
 }

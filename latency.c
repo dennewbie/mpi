@@ -27,13 +27,13 @@ int main() {
 	int val = 99;
 
 	// rank of the other node
-	int other = 1;
+	int other = world_size-1;
 	int root = 0;
 
 	double start_time = MPI_Wtime();
 
 	//receive
-	if (rank == other) {
+	if (rank == other && world_size > 1) {
 
 		MPI_Recv(&val, 1, MPI_INT, root, tag, MPI_COMM_WORLD, &status);
 		MPI_Send(&val, 1, MPI_INT, root, tag, MPI_COMM_WORLD);
@@ -48,5 +48,6 @@ int main() {
 		double end_time = MPI_Wtime();
 		printf("Roundtrip time between %d and %d = %f s\n", root, other, end_time - start_time);
 	}
+  MPI_Finalize();
 	return 0;
 }
