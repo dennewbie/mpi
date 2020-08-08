@@ -1,6 +1,6 @@
 MPICC=mpicc
 OPTS=-g -O0
-TARGETS=latency pi saxpy ring
+TARGETS=latency pi saxpy ring hello
 all: $(TARGETS)
 
 .PREFIXES:
